@@ -1,6 +1,6 @@
 // (c) 2018 Joachim Hofer
 
-#include "OpenDoor.h"
+#include "OpenableDoor.h"
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
 #include "Components/PrimitiveComponent.h"
@@ -8,7 +8,7 @@
 #define OUT
 
 // Sets default values for this component's properties
-UOpenDoor::UOpenDoor()
+UOpenableDoor::UOpenableDoor()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -17,28 +17,26 @@ UOpenDoor::UOpenDoor()
 
 
 // Called when the game starts
-void UOpenDoor::BeginPlay()
+void UOpenableDoor::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
 // Called every frame
-void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UOpenableDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	auto CurrentTime = GetWorld()->GetTimeSeconds();
 	if (GetTotalMassOfActorsOnPlate() > TriggerMass) {
-		OpenDoor();
-		LastDoorOpenTime = CurrentTime;
+		OnOpen.Broadcast();
 	}
-
-	if (CurrentTime > LastDoorOpenTime + DoorCloseDelay) {
-		CloseDoor();
+	else {
+		OnClose.Broadcast();
 	}
 }
 
-float UOpenDoor::GetTotalMassOfActorsOnPlate() const
+float UOpenableDoor::GetTotalMassOfActorsOnPlate() const
 {
 	TSet<AActor*> OverlappingActors;
 	if (!PressurePlate) {
@@ -53,14 +51,4 @@ float UOpenDoor::GetTotalMassOfActorsOnPlate() const
 	}
 
 	return TotalMass;
-}
-
-void UOpenDoor::OpenDoor()
-{
-	GetOwner()->SetActorRotation(FRotator(0.0f, OpenAngle, 0.0f));
-}
-
-void UOpenDoor::CloseDoor()
-{
-	GetOwner()->SetActorRotation(FRotator(0.0f, -90.0f, 0.0f));
 }
