@@ -41,6 +41,10 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 float UOpenDoor::GetTotalMassOfActorsOnPlate() const
 {
 	TSet<AActor*> OverlappingActors;
+	if (!PressurePlate) {
+		UE_LOG(LogTemp, Error, TEXT("Pressure Plate not initialized!"))
+		return 0.f;
+	}
 	PressurePlate->GetOverlappingActors(OUT OverlappingActors);
 
 	auto TotalMass = 0.f;
