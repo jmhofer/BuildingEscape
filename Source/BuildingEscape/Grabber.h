@@ -33,6 +33,7 @@ private:
 	void BindInputs();
 
 	const FHitResult GetFirstPhysicsBodyInReach();
+	const FVector GetLineTraceStart();
 	const FVector GetLineTraceEnd();
 
 	void Grab();

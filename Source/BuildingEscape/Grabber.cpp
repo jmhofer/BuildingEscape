@@ -37,8 +37,6 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 void UGrabber::Grab()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grabbed!"))
-
 	auto HitResult = GetFirstPhysicsBodyInReach();
 	if (HitResult.IsValidBlockingHit()) {
 		auto ComponentToGrab = HitResult.GetComponent();
@@ -48,8 +46,6 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Released!"))
-
 	if (PhysicsHandle->GetGrabbedComponent()) {
 		PhysicsHandle->ReleaseComponent();
 	}
@@ -57,20 +53,23 @@ void UGrabber::Release()
 
 const FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 {
-	FVector LineTraceEnd = GetLineTraceEnd();
 	FHitResult HitResult;
-	FCollisionQueryParams IgnorePawn(FName(TEXT("")), false, GetOwner());
 
+	GetWorld()->LineTraceSingleByObjectType(OUT HitResult, GetLineTraceStart(), GetLineTraceEnd(),
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
+		FCollisionQueryParams(FName(TEXT("")), false, GetOwner())
+	);
+
+	return HitResult;
+}
+
+const FVector UGrabber::GetLineTraceStart()
+{
 	FVector ViewPointLocation;
 	FRotator ViewPointRotation;
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT ViewPointLocation, OUT ViewPointRotation);
 
-	GetWorld()->LineTraceSingleByObjectType(OUT HitResult, ViewPointLocation, LineTraceEnd,
-		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
-		IgnorePawn
-	);
-
-	return HitResult;
+	return ViewPointLocation;
 }
 
 const FVector UGrabber::GetLineTraceEnd() 
@@ -85,9 +84,7 @@ const FVector UGrabber::GetLineTraceEnd()
 void UGrabber::InitializePhysicsHandle()
 {
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle) {
-	}
-	else {
+	if (PhysicsHandle == nullptr) {
 		UE_LOG(LogTemp, Error, TEXT("Did not find physics handle for %s"), *GetOwner()->GetName())
 	}
 }
