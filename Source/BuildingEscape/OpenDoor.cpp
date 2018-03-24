@@ -27,12 +27,23 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	auto CurrentTime = GetWorld()->GetTimeSeconds();
 	if (PressurePlate->IsOverlappingActor(ActorThatOpens)) {
 		OpenDoor();
+		LastDoorOpenTime = CurrentTime;
+	}
+
+	if (CurrentTime > LastDoorOpenTime + DoorCloseDelay) {
+		CloseDoor();
 	}
 }
 
 void UOpenDoor::OpenDoor()
 {
-	GetOwner()->SetActorRotation(FRotator(0.0f, -30.0f, 0.0f));
+	GetOwner()->SetActorRotation(FRotator(0.0f, OpenAngle, 0.0f));
+}
+
+void UOpenDoor::CloseDoor()
+{
+	GetOwner()->SetActorRotation(FRotator(0.0f, -90.0f, 0.0f));
 }
